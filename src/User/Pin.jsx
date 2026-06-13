@@ -1,4 +1,5 @@
 import { useState } from 'react'; // 🛡️ FIX: Menggunakan React murni, bukan Preact
+import { FiDelete } from 'react-icons/fi'; // 🛠️ FIX: Meng-import ikon FiDelete dari react-icons
 
 export default function Pin({ onBack, onFinish, pinSource }) {
   const [pin, setPin] = useState('');
@@ -199,7 +200,8 @@ const styles = {
   dotsContainer: { display: 'flex', gap: '16px', marginBottom: '35px' },
   dot: { width: '14px', height: '14px', borderRadius: '50%', border: '2px solid', transition: 'all 0.15s ease' },
   numpadGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 20px', width: '100%', marginBottom: '16px' },
-  numpadBtn: { width: '64px', height: '64px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyAxalign: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '50%', fontSize: '22px', fontWeight: '700', color: '#0f172a', cursor: 'pointer', transition: 'all 0.1s ease-in-out' },
+  // 🛠️ FIX: Menghapus properti typo 'justifyAxalign: "center"' agar tombol melingkar dengan sempurna
+  numpadBtn: { width: '64px', height: '64px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '50%', fontSize: '22px', fontWeight: '700', color: '#0f172a', cursor: 'pointer', transition: 'all 0.1s ease-in-out' },
   bottomRow: { display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' },
   numpadBtnSpecial: { width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent', border: 'none', fontSize: '16px', fontWeight: '700', color: '#64748b', cursor: 'pointer' },
   

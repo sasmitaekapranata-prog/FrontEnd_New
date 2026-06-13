@@ -8,19 +8,39 @@ export default function BuktiTransaksi({ data, onClose }) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(numeric);
   };
 
-  // 1. Ekstraksi nilai dasar nominal secara presisi
-  const nominalBersih = typeof data.amount === 'string' ? Number(data.amount.replace(/[^0-9]/g, '')) : data.amount;
+  // 1. Ekstraksi Total Penuh dari payload utama (misalnya: 115000)
+  const totalBiayaAkumulasi = typeof data.amount === 'string' 
+    ? Number(data.amount.replace(/[^0-9]/g, '')) 
+    : Number(data.amount || 0);
   
-  // 2. Perbaikan deteksi title e-wallet agar lebih toleran terhadap struktur teks payload
+  // 2. Deteksi Pintar String Title & Jenis Transaksi
   const titleText = data.title ? String(data.title).toLowerCase() : '';
   const isEWallet = titleText.includes('gopay') || 
                     titleText.includes('shopee') || 
                     titleText.includes('dana') || 
-                    titleText.includes('pay'); // Tambahan toleransi kata "pay"
+                    titleText.includes('pay') ||
+                    titleText.includes('wallet');
 
-  // 3. Sinkronisasi Biaya Admin & Akumulasi Total
-  const biayaAdmin = isEWallet ? 1000 : 0; 
-  const totalBiayaAkumulasi = nominalBersih + biayaAdmin;
+  // Deteksi jika transaksi merupakan transfer internasional berdasarkan mata uang atau kata kunci
+  const isInternational = titleText.includes('transfer usd') || 
+                          titleText.includes('transfer sgd') || 
+                          titleText.includes('transfer aud') || 
+                          titleText.includes('transfer eur') || 
+                          titleText.includes('internasional') ||
+                          data.biayaAdmin === 50000; // Mengantisipasi flag bawaan dari App.jsx sebelumnya
+
+  // 3. Penentuan Biaya Admin (Internasional = Rp 15.000, Lainnya = Rp 1.000)
+  let biayaAdmin = 1000; 
+  if (isInternational) {
+    biayaAdmin = 25000;
+  } else if (isEWallet) {
+    biayaAdmin = 1000;
+  } else if (data.biayaAdmin !== undefined && data.biayaAdmin !== null) {
+    biayaAdmin = 1000;
+  }
+
+  // 4. Hitung mundur nominal bersih agar data matematis selalu balance (Total - Admin)
+  const nominalBersih = totalBiayaAkumulasi - biayaAdmin;
 
   const today = new Date();
   const dateString = today.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -61,7 +81,13 @@ export default function BuktiTransaksi({ data, onClose }) {
           <div style={styles.detailRow}>
             <span>Jenis Layanan</span>
             <span style={styles.boldText}>
-              {data.type === 'plus' ? 'Top Up Akun' : isEWallet ? 'Top Up E-Wallet' : 'Transfer Bank'}
+              {data.type === 'plus' 
+                ? 'Top Up Akun' 
+                : isEWallet 
+                ? 'Top Up E-Wallet' 
+                : isInternational 
+                ? 'Transfer Internasional' 
+                : 'Transfer Bank'}
             </span>
           </div>
           <div style={styles.detailRow}>
@@ -86,7 +112,6 @@ export default function BuktiTransaksi({ data, onClose }) {
   );
 }
 
-// Styles objek tetap sama seperti sebelumnya...
 const styles = {
   overlay: { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 10000, fontFamily: "'Poppins', sans-serif", boxSizing: 'border-box' },
   receiptCard: { width: '100%', maxWidth: '400px', backgroundColor: 'white', borderRadius: '30px', padding: '30px', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', margin: 'auto', boxSizing: 'border-box' },

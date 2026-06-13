@@ -1,8 +1,14 @@
-import { useState } from 'react'; // 🛡️ FIX: Menggunakan React murni, bukan Preact
+import { useState, useEffect } from 'react'; // 🛡️ FIX: Menggunakan React murni, bukan Preact
 
 export default function ProsesWallet({ selectedWallet, onBack, onLogout, onPaymentSuccess }) {
-  // Ambil nama e-wallet murni dari state objek atau string langsung
-  const walletName = selectedWallet?.selectedWallet || selectedWallet || 'Shoopeepay';
+  // 🔄 Ambil nama e-wallet secara fleksibel & seragamkan menjadi huruf kecil untuk pengecekan switch-case
+  const rawWalletName = selectedWallet?.selectedWallet || selectedWallet || 'Shoopeepay';
+  const walletKey = rawWalletName.toLowerCase().trim();
+
+  // Menentukan nama tampilan (Display Name) yang rapi
+  let walletDisplayName = 'Shoopeepay';
+  if (walletKey.includes('gopay')) walletDisplayName = 'Gopay';
+  if (walletKey.includes('dana')) walletDisplayName = 'Danatopup';
 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [nominal, setNominal] = useState(''); // Menyimpan string terformat (Contoh: "50.000")
@@ -50,17 +56,17 @@ export default function ProsesWallet({ selectedWallet, onBack, onLogout, onPayme
     // Lempar data objek lengkap ke App.jsx untuk dialihkan ke case 'konfirmwallet'
     if (onPaymentSuccess) {
       onPaymentSuccess({
-        selectedWallet: walletName,
+        selectedWallet: walletDisplayName, // Mengirimkan nama yang sudah rapi
         phoneNumber: phoneNumber,
         nominalTopUp: numericNominal
       });
     }
   };
 
-  // Tampilan Logo E-Wallet Dinamis Sesuai State yang Dipilih Sebelumnya
+  // Tampilan Logo E-Wallet Dinamis Sesuai State yang Dipilih di AddWallet
   const renderSelectedWalletLogo = () => {
-    switch (walletName) {
-      case 'Gopay':
+    switch (walletKey) {
+      case 'gopay':
         return (
           <div style={styles.walletBadge}>
             <div style={styles.gopayIcon}>
@@ -69,7 +75,8 @@ export default function ProsesWallet({ selectedWallet, onBack, onLogout, onPayme
             <span style={{ color: '#0f172a', fontWeight: '800', fontSize: '16px', letterSpacing: '-0.5px' }}>Gopay</span>
           </div>
         );
-      case 'Danatopup':
+      case 'dana':
+      case 'danatopup':
         return (
           <div style={styles.walletBadge}>
             <div style={styles.danaLogoText}>
@@ -79,7 +86,9 @@ export default function ProsesWallet({ selectedWallet, onBack, onLogout, onPayme
             <span style={{ color: '#0081c9', fontWeight: '800', fontSize: '16px' }}>Danatopup</span>
           </div>
         );
-      case 'Shoopeepay':
+      case 'shopeepay':
+      case 'shoopeepay':
+      case 'spay':
       default:
         return (
           <div style={styles.walletBadge}>
@@ -167,7 +176,7 @@ export default function ProsesWallet({ selectedWallet, onBack, onLogout, onPayme
               className="input-wallet-box"
               style={{
                 ...styles.inputBox,
-                paddingLeft: nominal ? '54px' : '24px' // Geser teks jika prefiks "Rp" muncul
+                paddingLeft: nominal ? '54px' : '24px'
               }} 
             />
           </div>

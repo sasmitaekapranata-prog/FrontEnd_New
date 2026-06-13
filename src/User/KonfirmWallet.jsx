@@ -1,157 +1,101 @@
-import { useState } from 'react';
-import KonfirmPin from './KonfirmPin';
+import React from 'react';
 
 export default function KonfirmWallet({ 
   selectedWallet, 
   phoneNumber, 
   nominalTopUp, 
-  receiverName, 
+  userName, // Menerima data nama dinamis dari profil App.jsx
   onBack, 
   onLogout, 
   onPaymentSuccess 
 }) {
-  const [showPin, setShowPin] = useState(false);
-
-  const walletName = selectedWallet?.selectedWallet || selectedWallet || 'Shoopeepay';
-  const namaPenerima = receiverName || selectedWallet?.receiverName || 'Angeliqia V G Pardosi'; 
-  const nomorTelepon = phoneNumber || selectedWallet?.phoneNumber || '081362267690'; 
-  const nominalValue = Number(nominalTopUp || selectedWallet?.nominalTopUp || 100000);        
-  const biayaAdmin = 1000;
-  const totalPembayaran = nominalValue + biayaAdmin;
-
-  const formatRupiah = (angka) => 'Rp' + (angka || 0).toLocaleString('id-ID');
-
-  const renderMiniLogo = () => {
-    switch (walletName) {
-      case 'Gopay':
-        return (
-          <div style={styles.walletBadge}>
-            <div style={styles.gopayDot}></div>
-            <span style={{ color: '#0f172a', fontWeight: '700', fontSize: '16px' }}>Gopay</span>
-          </div>
-        );
-      case 'Danatopup':
-        return (
-          <div style={styles.walletBadge}>
-            <span style={styles.danaDot}>D</span>
-            <span style={{ color: '#0081c9', fontWeight: '700', fontSize: '16px' }}>Danatopup</span>
-          </div>
-        );
-      case 'Shoopeepay':
-      default:
-        return (
-          <div style={styles.walletBadge}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: '800', color: '#ff4500' }}>
-              <span style={styles.shopeeIcon}>S</span>
-              <span style={{ fontStyle: 'italic', fontWeight: '900' }}>Pay</span>
-            </div>
-            <span style={{ color: '#ff4500', fontWeight: '700', fontSize: '16px' }}>Shoopeepay</span>
-          </div>
-        );
-    }
-  };
+  const adminFee = 1000;
+  const totalPayment = Number(nominalTopUp || 0) + adminFee;
 
   return (
-    <div style={styles.container}>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-      
-      <style>{`
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body, html { width: 100%; height: auto; background: #f8fafc; }
-        .btn-active:hover { opacity: 0.95; transform: translateY(-1px); }
-        .btn-pay:active { transform: scale(0.97); }
-      `}</style>
-
-      <div style={styles.dashboardWrapper}>
-        <header style={styles.header}>
-          <div style={styles.brandSection}>
-            <div onClick={onBack} style={styles.logoContainer} title="Home">
-              <span style={styles.logoTextBlue}>TrustPay</span>
-              <span style={styles.logoTextLightBlue}>.id</span>
-              <span style={{ marginLeft: '6px', fontSize: '28px' }}>🛡️</span>
-            </div>
-          </div>
-          <nav style={styles.navMenu}>
-            <span onClick={onBack} style={styles.navItemActive}>Home</span>
-            <span onClick={() => alert('Tidak ada notifikasi baru.')} style={styles.navItem}>Notifikasi</span>
-            <span onClick={onLogout} style={styles.navItemLogout}>Logout</span>
-          </nav>
-        </header>
-
-        <main style={styles.contentCard}>
-          <div style={styles.topBarRow}>
-            <button type="button" onClick={onBack} style={styles.btnBackMini}>BACK</button>
-          </div>
-
-          <div style={styles.walletSection}>
-            {renderMiniLogo()}
-            <span style={styles.phoneSubtitle}>{nomorTelepon}</span>
-          </div>
-
-          <div style={styles.detailsContainer}>
-            <div style={styles.rowDetail}>
-              <span style={styles.labelLeft}>Penerima</span>
-              <span style={styles.valueRight}>{namaPenerima}</span>
-            </div>
-            <div style={styles.rowDetail}>
-              <span style={styles.labelLeft}>Nominal</span>
-              <span style={styles.valueRight}>{formatRupiah(nominalValue)}</span>
-            </div>
-            <div style={styles.rowDetail}>
-              <span style={styles.labelLeft}>Biaya Admin</span>
-              <span style={styles.valueRight}>{formatRupiah(biayaAdmin)}</span>
-            </div>
-            <hr style={styles.dividerLine} />
-            <div style={styles.rowTotal}>
-              <span style={styles.labelTotal}>Total</span>
-              <span style={styles.valueTotal}>{formatRupiah(totalPembayaran)}</span>
-            </div>
-          </div>
-
-          <button onClick={() => setShowPin(true)} className="btn-pay" style={styles.btnBayar}>
-            Bayar
-          </button>
-        </main>
+    <div style={{
+      width: '100vw', height: '100vh', backgroundColor: '#f3f4f6',
+      fontFamily: "'Poppins', sans-serif", padding: '40px 20px', boxSizing: 'border-box'
+    }}>
+      {/* HEADER TOP NAV */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        maxWidth: '1000px', margin: '0 auto 30px auto'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+          <span style={{ fontWeight: '800', fontSize: '28px', color: '#2563eb' }}>TrustPay</span>
+          <span style={{ fontWeight: '800', fontSize: '28px', color: '#1f2937' }}>.id</span>
+          <span style={{ fontSize: '24px', marginLeft: '4px' }}>🛡️</span>
+        </div>
+        <div style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
+          <span style={{ fontWeight: '600', color: '#2563eb', borderBottom: '2px solid #2563eb', paddingBottom: '4px', cursor: 'pointer' }}>Home</span>
+          <span style={{ fontWeight: '600', color: '#4b5563', cursor: 'pointer' }}>Notifikasi</span>
+          <span onClick={onLogout} style={{ fontWeight: '600', color: '#ef4444', cursor: 'pointer' }}>Logout</span>
+        </div>
       </div>
 
-      <KonfirmPin 
-        isOpen={showPin} 
-        onClose={() => setShowPin(false)} 
-        onSuccess={() => { setShowPin(false); if (onPaymentSuccess) onPaymentSuccess(); }}
-      />
+      {/* KARTU UTAMA KONFIRMASI */}
+      <div style={{
+        backgroundColor: '#ffffff', borderRadius: '24px', padding: '40px',
+        maxWidth: '850px', margin: '0 auto', boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+      }}>
+        <button onClick={onBack} style={{
+          padding: '8px 24px', border: '2px solid #2563eb', backgroundColor: 'transparent',
+          color: '#2563eb', borderRadius: '12px', fontWeight: '700', fontSize: '14px',
+          cursor: 'pointer', marginBottom: '30px'
+        }}>
+          BACK
+        </button>
+
+        {/* INFO WALLET DAN NOMOR */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '25px', marginBottom: '40px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px',
+            border: '1px solid #2563eb', borderRadius: '12px', color: '#2563eb', fontWeight: '700'
+          }}>
+            <span>🔹</span> {selectedWallet} Topup
+          </div>
+          <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>
+            {phoneNumber}
+          </div>
+        </div>
+
+        {/* RINCIAN STRIP DETAIL */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#9ca3af', fontWeight: '600' }}>Penerima</span>
+            {/* Menampilkan nama profil secara dinamis */}
+            <span style={{ color: '#1f2937', fontWeight: '800', fontSize: '16px' }}>{userName}</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#9ca3af', fontWeight: '600' }}>Nominal</span>
+            <span style={{ color: '#1f2937', fontWeight: '800' }}>Rp {Number(nominalTopUp).toLocaleString('id-ID')}</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#9ca3af', fontWeight: '600' }}>Biaya Admin</span>
+            <span style={{ color: '#1f2937', fontWeight: '800' }}>Rp {adminFee.toLocaleString('id-ID')}</span>
+          </div>
+        </div>
+
+        <hr style={{ border: 'none', borderTop: '1px dashed #e5e7eb', marginBottom: '30px' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+          <span style={{ color: '#1f2937', fontWeight: '800', fontSize: '18px' }}>Total</span>
+          <span style={{ color: '#1f2937', fontWeight: '800', fontSize: '26px' }}>Rp {totalPayment.toLocaleString('id-ID')}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button onClick={onPaymentSuccess} style={{
+            padding: '14px 100px', backgroundColor: '#2563eb', color: '#ffffff',
+            border: 'none', borderRadius: '24px', fontWeight: '700', fontSize: '16px',
+            cursor: 'pointer', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
+          }}>
+            Bayar
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  // overflowY: 'auto' memungkinkan scrolling, justifyContent: 'flex-start' memastikan konten dimulai dari atas
-  container: { backgroundColor: '#f8fafc', minHeight: '100vh', width: '100vw', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', boxSizing: 'border-box', padding: '40px 24px' },
-  dashboardWrapper: { width: '100%', maxWidth: '1050px', display: 'flex', flexDirection: 'column', gap: '10px' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '20px' },
-  brandSection: { display: 'flex', alignItems: 'center' },
-  logoContainer: { display: 'flex', alignItems: 'center', cursor: 'pointer' },
-  logoTextBlue: { fontWeight: '800', fontSize: '32px', color: '#1a56db' },
-  logoTextLightBlue: { fontWeight: '800', fontSize: '32px', color: '#60a5fa' },
-  navMenu: { display: 'flex', gap: '25px', alignItems: 'center' },
-  navItem: { cursor: 'pointer', color: '#0f172a', fontWeight: '700', fontSize: '15px' },
-  navItemActive: { cursor: 'pointer', color: '#1a56db', fontWeight: '700', fontSize: '15px', borderBottom: '3px solid #1a56db', paddingBottom: '2px' },
-  navItemLogout: { cursor: 'pointer', color: '#ef4444', fontWeight: '700', fontSize: '15px' },
-  contentCard: { border: '1px solid #e2e8f0', borderRadius: '24px', padding: '40px', backgroundColor: '#ffffff', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.05)', display: 'flex', flexDirection: 'column', width: '100%', marginBottom: '40px' },
-  topBarRow: { display: 'flex', justifyContent: 'flex-start', width: '100%', marginBottom: '20px' },
-  btnBackMini: { backgroundColor: '#ffffff', border: '2px solid #1a56db', color: '#1a56db', padding: '6px 20px', borderRadius: '15px', fontWeight: '700', fontSize: '13px', cursor: 'pointer' },
-  walletSection: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' },
-  walletBadge: { display: 'inline-flex', alignItems: 'center', gap: '10px', border: '1.5px solid #bfdbfe', borderRadius: '12px', padding: '8px 20px', backgroundColor: '#ffffff' },
-  shopeeIcon: { backgroundColor: '#FF4500', color: 'white', padding: '2px 6px', borderRadius: '4px', fontWeight: '800', fontSize: '12px' },
-  gopayDot: { width: '16px', height: '16px', backgroundColor: '#00AED6', borderRadius: '50%' },
-  danaDot: { width: '18px', height: '18px', backgroundColor: '#0081C9', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '11px', fontWeight: 'bold' },
-  phoneSubtitle: { fontSize: '20px', color: '#0f172a', fontWeight: '700' },
-  detailsContainer: { display: 'flex', flexDirection: 'column', width: '100%', gap: '16px' },
-  rowDetail: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' },
-  labelLeft: { fontSize: '15px', fontWeight: '600', color: '#94a3b8' },
-  valueRight: { fontSize: '15px', fontWeight: '700', color: '#0f172a', textAlign: 'right' },
-  dividerLine: { border: 'none', borderTop: '1px dashed #e2e8f0', margin: '10px 0' },
-  rowTotal: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' },
-  labelTotal: { fontSize: '15px', fontWeight: '700', color: '#0f172a' },
-  valueTotal: { fontSize: '24px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' },
-  btnBayar: { backgroundColor: '#1a56db', border: 'none', color: '#ffffff', padding: '12px 0', width: '200px', borderRadius: '9999px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', alignSelf: 'center', marginTop: '10px', transition: 'all 0.15s ease' }
-};

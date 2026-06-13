@@ -33,7 +33,7 @@ import DashboardAdmin from '../admin/Dashboard.jsx';
 // Dummy API instance agar tidak crash jika API eksternal belum di-import
 const API = {
   get: async () => ({ data: {} }),
-  post: async () => ({ data: {} })
+  post: async () => ({ data: {} }),
 };
 
 // SVG Icons Pack
@@ -72,7 +72,9 @@ export default function App() {
   const [transferInternasionalData, setTransferInternasionalData] = useState({
     mataUang: 'USD', metodeTransfer: 'ACH Transfer (Amerika)', rekeningTujuan: '', nominalValas: 0, hasilKonversi: 0, totalBiayaAdmin: 50000, totalBayarIdr: 0
   });
-  const [selectedWalletData, setSelectedWalletData] = useState({ selectedWallet: 'Shoopeepay', phoneNumber: '', nominalTopUp: 0 });
+  
+  // Integrasi State E-Wallet Dinamis
+  const [selectedWalletData, setSelectedWalletData] = useState({ selectedWallet: 'ShopeePay', phoneNumber: '', nominalTopUp: 0 });
 
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false); 
@@ -88,7 +90,6 @@ export default function App() {
     
     if (token && role === 'user') {
       fetchUserProfile();
-      fetchNotifications(); 
       setPageState('dashboard'); 
     }
   }, []);
@@ -105,7 +106,6 @@ export default function App() {
       }
     } catch (err) {
       console.error("Gagal mengambil profil database:", err);
-      // PERBAIKAN: Jika state sudah terisi dari halaman daftar, jangan timpa dengan "Nasabah Test"
       setUserName(prev => (prev !== 'Memuat...' && prev !== '') ? prev : 'Nasabah Test');
       setUserPhone(prev => (prev !== '...' && prev !== '') ? prev : '+62...');
     }
@@ -117,7 +117,7 @@ export default function App() {
       id: Date.now(),
       title: title,
       amount: amount,
-      type: type, // 'minus' untuk pengeluaran, 'plus' untuk pemasukan
+      type: type, 
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
       time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
       message: `Transaksi sebesar Rp ${amount.toLocaleString('id-ID')} berhasil diproses.`
@@ -179,48 +179,36 @@ export default function App() {
       case 'welcome':
         return (
           <div style={{
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', 
+            display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', 
             height: '100vh', width: '100vw', background: 'linear-gradient(135deg, #b4cffa 0%, #689bf6 45%, #2563eb 100%)', 
-            fontFamily: "'Poppins', sans-serif", padding: '0 10%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden'
+            fontFamily: "'Poppins', sans-serif", padding: '5% 10%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden'
           }}>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-            <div style={{ position: 'absolute', top: '60px', left: '10%', display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <span style={{ fontWeight: '800', fontSize: '34px', color: '#003bfb', letterSpacing: '-0.5px' }}>TrustPay</span>
-              <span style={{ fontWeight: '800', fontSize: '34px', color: '#ffffff', letterSpacing: '-0.5px' }}>.id</span>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="#003bfb" style={{ marginLeft: '6px' }}>
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                <path d="M10 15l-3.5-3.5 1.42-1.42L10 12.17l5.08-5.08 1.42 1.42z" fill="#ffffff"/>
-              </svg>
+            
+            <div 
+              onClick={() => setPageState('welcome')} 
+              style={{ marginBottom: '60px', cursor: 'pointer' }} 
+              title="Kembali ke halaman utama"
+            >
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px' }}>
+                TrustPay.id 🛡️
+              </div>
             </div>
-            <div style={{ maxWidth: '800px', textAlign: 'left', marginTop: '20px' }}>
-              <h4 style={{ color: '#ffffff', fontSize: '1.15rem', fontWeight: '500', marginBottom: '15px', opacity: 0.95 }}>
+
+            <div style={{ maxWidth: '800px', textAlign: 'left' }}>
+              <h3 style={{ color: '#ffffff', fontSize: '1.25rem', fontWeight: '500', marginBottom: '15px', opacity: 0.95 }}>
                 Halo, selamat datang!
-              </h4>
-              <h1 style={{ color: '#ffffff', fontSize: '4.2rem', fontWeight: '700', marginBottom: '14px', lineHeight: '1.2', letterSpacing: '-0.5px' }}>
+              </h3>
+              <h1 style={{ color: '#ffffff', fontSize: '3.8rem', fontWeight: '700', marginBottom: '14px', lineHeight: '1.2', letterSpacing: '-0.5px' }}>
                 Satu aplikasi untuk semua<br />kebutuhan kamu.
               </h1>
-              <p style={{ color: '#ffffff', fontSize: '1.1rem', fontWeight: '400', marginBottom: '40px', opacity: 0.90 }}>
+              <p style={{ color: '#ffffff', fontSize: '1.15rem', fontWeight: '400', marginBottom: '40px', opacity: 0.90 }}>
                 Kelola semua pembayaran Anda dalam satu akun.
               </p>
+              
               <div style={{ display: 'flex', gap: '20px' }}>
-                <button 
-                  onClick={() => setPageState('daftar')}
-                  style={{
-                    padding: '12px 55px', background: '#001bd4', color: '#ffffff', border: 'none',
-                    borderRadius: '16px', fontWeight: '600', fontSize: '1.05rem', cursor: 'pointer'
-                  }}
-                >
-                  Daftar
-                </button>
-                <button 
-                  onClick={() => setPageState('masukuser')}
-                  style={{
-                    padding: '12px 55px', background: 'transparent', color: '#001bd4', border: '2px solid #001bd4', 
-                    borderRadius: '16px', fontWeight: '600', fontSize: '1.05rem', cursor: 'pointer'
-                  }}
-                >
-                  Login
-                </button>
+                <button onClick={() => setPageState('daftar')} style={{ padding: '14px 60px', background: '#001bd4', color: '#ffffff', border: 'none', borderRadius: '16px', fontWeight: '600', fontSize: '1.05rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0, 27, 212, 0.3)' }}>Daftar</button>
+                <button onClick={() => setPageState('masukuser')} style={{ padding: '14px 60px', background: 'transparent', color: '#ffffff', border: '2px solid #ffffff', borderRadius: '16px', fontWeight: '600', fontSize: '1.05rem', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>Login</button>
               </div>
             </div>
           </div>
@@ -235,26 +223,20 @@ export default function App() {
           <Daftar 
             onBack={() => setPageState('welcome')} 
             onNext={async (n, p, e, pwd) => { 
-              // PERBAIKAN: Set state langsung di sini agar tersimpan sementara di memori utama komponen parent
               if (n) setUserName(n); 
               if (p) setUserPhone(p); 
-              
               try { 
                 const res = await API.post('/register', { name: n, phone: p, email: e || p, password: pwd }); 
-                if (res.data.token) { 
-                  localStorage.setItem('auth_token', res.data.token); 
-                  localStorage.setItem('user_role', 'user'); 
-                } 
+                if (res.data.token) { localStorage.setItem('auth_token', res.data.token); localStorage.setItem('user_role', 'user'); } 
                 setPageState('pin'); 
               } catch (err) { 
-                console.log("Registrasi diset secara lokal untuk simulasi front-end.");
-                setPageState('pin'); // Tetap lanjut ke halaman PIN untuk testing UI/UX lokal
+                setPageState('pin'); 
               } 
             }} 
           />
         );
       case 'pin': 
-        return <Pin key="pin-daftar" pinSource="daftar" onBack={() => setPage('daftar')} onFinish={() => { fetchUserProfile(); setPageState('dashboard'); }} />;
+        return <Pin key="pin-daftar" pinSource="daftar" userName={userName} onBack={() => setPage('daftar')} onFinish={() => { fetchUserProfile(); setPageState('dashboard'); }} />;
       case 'notifikasi': 
         return <Notifikasi notificationData={notifications} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} onOpenReceipt={(item) => { setSelectedReceipt({ ...item, standardClose: true }); }} />;
       case 'insight':
@@ -263,68 +245,48 @@ export default function App() {
         return <Profil userName={userName} onChangeName={setUserName} userPhone={userPhone} totalSaldo={totalSaldo} onBack={() => setPage('dashboard')} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} />;
       
       case 'AddWallet':
-        return <AddWallet onBack={() => setPage('dashboard')} onLogout={handleOpenLogout} onNavigate={(t) => setPage(t)} onConfirmNext={(w) => { setSelectedWalletData({ selectedWallet: w, phoneNumber: '', nominalTopUp: 0 }); setPageState('proseswallet'); }} />;
+        return <AddWallet onBack={() => setPage('dashboard')} onLogout={handleOpenLogout} onNavigate={(t) => setPage(t)} onConfirmNext={(walletName) => { setSelectedWalletData({ selectedWallet: walletName, phoneNumber: '', nominalTopUp: 0 }); setPageState('proseswallet'); }} />;
       case 'proseswallet':
-        return <ProsesWallet selectedWallet={selectedWalletData?.selectedWallet || 'Shoopeepay'} onBack={() => setPage('AddWallet')} onLogout={handleOpenLogout} onPaymentSuccess={(payload) => { setSelectedWalletData(payload); setPageState('konfirmwallet'); }} />;
-      
+        return <ProsesWallet selectedWallet={selectedWalletData?.selectedWallet || 'ShopeePay'} onBack={() => setPage('AddWallet')} onLogout={handleOpenLogout} onPaymentSuccess={(payload) => { setSelectedWalletData(payload); setPageState('konfirmwallet'); }} />;
       case 'konfirmwallet': 
-        return <KonfirmWallet 
-          selectedWallet={selectedWalletData?.selectedWallet || 'Shoopeepay'} 
-          phoneNumber={selectedWalletData?.phoneNumber || ''} 
-          nominalTopUp={selectedWalletData?.nominalTopUp || 0} 
-          onBack={() => setPage('proseswallet')} 
-          onLogout={handleOpenLogout} 
-          onPaymentSuccess={async () => { 
-            const nom = Number(selectedWalletData?.nominalTopUp || 0); 
-            const txtTitle = `${selectedWalletData?.selectedWallet || 'E-Wallet'} - ${selectedWalletData?.phoneNumber}`;
-            try { 
-              await API.post('/ewallet/topup', { 
-                wallet_name: selectedWalletData?.selectedWallet, 
-                phone_number: selectedWalletData?.phoneNumber, 
-                amount: nom 
-              }); 
-              setTotalSaldo(prev => prev - nom); 
-              addMockNotification(txtTitle, nom, 'minus');
-
-              setSelectedReceipt({ 
-                id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, standardClose: false 
-              }); 
-            } catch (err) { 
-              setTotalSaldo(prev => prev - nom); 
-              addMockNotification(txtTitle, nom, 'minus');
-              setSelectedReceipt({ 
-                id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, standardClose: false 
-              }); 
-            } 
-          }} 
-        />;
+        return (
+          <div style={{ position: 'relative', width: '100%', minHeight: '100vh' }}>
+            <KonfirmWallet selectedWallet={selectedWalletData?.selectedWallet || 'ShopeePay'} phoneNumber={selectedWalletData?.phoneNumber || ''} nominalTopUp={selectedWalletData?.nominalTopUp || 0} userName={userName} onBack={() => setPageState('proseswallet')} onLogout={handleOpenLogout} onPaymentSuccess={() => setShowPinModal(true)} />
+            {showPinModal && (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999 }}>
+                <Pin key="modal-transaksi-wallet-secure" pinSource="transaksi" userName={userName} onBack={() => setShowPinModal(false)} 
+                  onFinish={async () => { 
+                    setShowPinModal(false); 
+                    const nom = Number(selectedWalletData?.nominalTopUp || 0); 
+                    const txtTitle = `${selectedWalletData?.selectedWallet || 'E-Wallet'} - ${selectedWalletData?.phoneNumber}`;
+                    try { 
+                      await API.post('/ewallet/topup', { wallet_name: selectedWalletData?.selectedWallet, phone_number: selectedWalletData?.phoneNumber, amount: nom }); 
+                      setTotalSaldo(prev => prev - nom); 
+                      addMockNotification(txtTitle, nom, 'minus');
+                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, biayaAdmin: 1000, standardClose: false }); 
+                    } catch (err) { 
+                      setTotalSaldo(prev => prev - nom); 
+                      addMockNotification(txtTitle, nom, 'minus');
+                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, biayaAdmin: 1000, standardClose: false }); 
+                    } 
+                  }} 
+                />
+              </div>
+            )}
+          </div>
+        );
       
       case 'send':
         return <Send onBack={() => setPage('dashboard')} onLogout={handleOpenLogout} onSelectNasional={() => setPage('nasional')} onSelectInternasional={() => setPage('internasional')} />;
       
       case 'nasional':
-        return <Nasional 
-          onBack={() => setPage('send')} 
-          onLogout={handleOpenLogout} 
-          onSwitchToInternational={() => setPage('internasional')} 
-          onNavigate={(t) => setPage(t)} 
+        return <Nasional onBack={() => setPage('send')} onLogout={handleOpenLogout} onSwitchToInternational={() => setPage('internasional')} onNavigate={(t) => setPage(t)} 
           onNextToConfirm={(arg1, arg2, arg3) => { 
             let payload = {};
             if (typeof arg1 === 'object' && arg1 !== null) {
-               payload = { 
-                 ...arg1,
-                 bank: arg1.bank || arg1.bankName || '',
-                 rekening: arg1.rekening || arg1.accountNumber || '',
-                 nominal: Number(arg1.nominal || arg1.amount || 0),
-                 amount: Number(arg1.amount || arg1.nominal || 0)
-               };
+               payload = { ...arg1, bank: arg1.bank || arg1.bankName || '', rekening: arg1.rekening || arg1.accountNumber || '', nominal: Number(arg1.nominal || arg1.amount || 0), amount: Number(arg1.amount || arg1.nominal || 0) };
             } else {
-               payload = {
-                 bank: arg1 || '',
-                 rekening: arg2 || '',
-                 nominal: Number(arg3 || 0),
-                 amount: Number(arg3 || 0)
-               };
+               payload = { bank: arg1 || '', rekening: arg2 || '', nominal: Number(arg3 || 0), amount: Number(arg3 || 0) };
             }
             setTransferNasionalData(payload); 
             setPageState('konfirmasinasional'); 
@@ -332,36 +294,48 @@ export default function App() {
         />; 
       
       case 'konfirmasinasional':
-        return <KonfirmasiNasional 
-          data={transferNasionalData} 
-          onBack={() => setPage('nasional')} 
-          onNavigate={(t) => setPage(t)} 
-          onLogout={handleOpenLogout} 
-          onNextToPin={async () => { 
-            const nom = Number(transferNasionalData.nominal || transferNasionalData.amount || 0); 
-            const txtTitle = `Bank ${transferNasionalData.bank || ''} - ${transferNasionalData.rekening || ''}`;
-            try { 
-              await API.post('/transfer/nasional', { 
-                bank_name: transferNasionalData.bank, 
-                account_number: transferNasionalData.rekening, 
-                amount: nom 
-              }); 
-              
-              setTotalSaldo(prev => prev - nom); 
-              addMockNotification(txtTitle, nom, 'minus');
-
-              setSelectedReceipt({ 
-                id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, standardClose: false 
-              }); 
-            } catch (err) { 
-              setTotalSaldo(prev => prev - nom); 
-              addMockNotification(txtTitle, nom, 'minus');
-              setSelectedReceipt({ 
-                id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, standardClose: false 
-              }); 
-            } 
-          }} 
-        />;
+        return (
+          <div style={{ position: 'relative', width: '100%', minHeight: '100vh' }}>
+            <KonfirmasiNasional data={transferNasionalData} onBack={() => setPage('nasional')} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} onNextToPin={() => setShowPinModal(true)} />
+            
+            {/* Modal PIN Transfer Nasional */}
+            {showPinModal && (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999 }}>
+                <Pin 
+                  key="modal-transaksi-nasional-secure" 
+                  pinSource="transaksi" 
+                  userName={userName}
+                  onBack={() => setShowPinModal(false)} 
+                  onFinish={async () => {
+                    setShowPinModal(false);
+                    const nomTransfer = Number(transferNasionalData.nominal || transferNasionalData.amount || 0); 
+                    const biayaAdmin = 1000; // Pasang tetap 1000 rupiah
+                    const totalBayar = nomTransfer + biayaAdmin;
+                    const txtTitle = `Bank ${transferNasionalData.bank || ''} - ${transferNasionalData.rekening || ''}`;
+                    
+                    try { 
+                      await API.post('/transfer/nasional', { bank_name: transferNasionalData.bank, account_number: transferNasionalData.rekening, amount: nomTransfer, admin_fee: biayaAdmin }); 
+                      setTotalSaldo(prev => prev - totalBayar); 
+                      addMockNotification(txtTitle, totalBayar, 'minus');
+                      
+                      // Payload terstandarisasi penuh
+                      setSelectedReceipt({ 
+                        id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalBayar, biayaAdmin: biayaAdmin, standardClose: false 
+                      }); 
+                    } catch (err) { 
+                      setTotalSaldo(prev => prev - totalBayar); 
+                      addMockNotification(txtTitle, totalBayar, 'minus');
+                      
+                      setSelectedReceipt({ 
+                        id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalBayar, biayaAdmin: biayaAdmin, standardClose: false 
+                      }); 
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
       
       case 'internasional':
         return <Internasional onBack={() => setPage('send')} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} onSwitchToNasional={() => setPage('nasional')} onNext={(curr) => { setTransferInternasionalData(prev => ({ ...prev, mataUang: curr.id.toUpperCase(), rekeningTujuan: '' })); setPageState('konfirmasiinternasional'); }} />;
@@ -371,44 +345,23 @@ export default function App() {
       case 'prosesinternasional':
         return (
           <div style={{ position: 'relative', width: '100%', minHeight: '100vh' }}>
-            <ProsesInternasional 
-              initialData={transferInternasionalData} 
-              onBack={() => setPage('konfirmasiinternasional')} 
-              onNavigate={(t) => setPage(t)} 
-              onLogout={handleOpenLogout} 
-              onPaymentSuccess={() => setShowPinModal(true)} 
-            />
+            <ProsesInternasional initialData={transferInternasionalData} onBack={() => setPage('konfirmasiinternasional')} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} onPaymentSuccess={() => setShowPinModal(true)} />
             {showPinModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999 }}>
-                <Pin 
-                  key="modal-transaksi-internasional-secure" 
-                  pinSource="transaksi" 
-                  onBack={() => setShowPinModal(false)} 
+                <Pin key="modal-transaksi-internasional-secure" pinSource="transaksi" userName={userName} onBack={() => setShowPinModal(false)} 
                   onFinish={async () => { 
                     setShowPinModal(false); 
                     const totalIdr = Number(transferInternasionalData.totalBayarIdr || 0); 
                     const txtTitle = `Transfer ${transferInternasionalData.mataUang} - ${transferInternasionalData.rekeningTujuan}`;
                     try { 
-                      await API.post('/transfer/internasional', { 
-                        currency: transferInternasionalData.mataUang, 
-                        method: transferInternasionalData.metodeTransfer, 
-                        target_account: transferInternasionalData.rekeningTujuan, 
-                        amount_valas: Number(transferInternasionalData.nominalValas), 
-                        total_pay_idr: totalIdr 
-                      }); 
-                      
+                      await API.post('/transfer/internasional', { currency: transferInternasionalData.mataUang, method: transferInternasionalData.metodeTransfer, target_account: transferInternasionalData.rekeningTujuan, amount_valas: Number(transferInternasionalData.nominalValas), total_pay_idr: totalIdr }); 
                       setTotalSaldo(prev => prev - totalIdr); 
                       addMockNotification(txtTitle, totalIdr, 'minus');
-
-                      setSelectedReceipt({ 
-                        id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalIdr, standardClose: false 
-                      }); 
+                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalIdr, biayaAdmin: 50000, standardClose: false }); 
                     } catch (err) { 
                       setTotalSaldo(prev => prev - totalIdr); 
                       addMockNotification(txtTitle, totalIdr, 'minus');
-                      setSelectedReceipt({ 
-                        id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalIdr, standardClose: false 
-                      }); 
+                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: totalIdr, biayaAdmin: 50000, standardClose: false }); 
                     } 
                   }} 
                 />
@@ -417,22 +370,7 @@ export default function App() {
           </div>
         );
       case 'exchange':
-        return (
-          <Exchange 
-            onBack={() => setPage('dashboard')} 
-            onNavigate={(t) => setPage(t)} 
-            onLogout={handleOpenLogout} 
-            onFinishExchange={(exchangeData) => { 
-              if (exchangeData && exchangeData.amount) {
-                addMockNotification(`Exchange Valas ${exchangeData.from || ''} ke ${exchangeData.to || ''}`, Number(exchangeData.amount), 'minus');
-              } else {
-                addMockNotification(`Penukaran Valas Berhasil`, 0, 'minus');
-              }
-              fetchUserProfile(); 
-              setPageState('dashboard'); 
-            }} 
-          />
-        );
+        return <Exchange onBack={() => setPage('dashboard')} onNavigate={(t) => setPage(t)} onLogout={handleOpenLogout} onFinishExchange={(exchangeData) => { if (exchangeData && exchangeData.amount) { addMockNotification(`Exchange Valas ${exchangeData.from || ''} ke ${exchangeData.to || ''}`, Number(exchangeData.amount), 'minus'); } else { addMockNotification(`Penukaran Valas Berhasil`, 0, 'minus'); } fetchUserProfile(); setPageState('dashboard'); }} />;
       default:
         return <MasukUser onBack={() => { localStorage.clear(); window.location.reload(); }} onLoginSuccess={() => setPageState('dashboard')} />;
     }
@@ -440,133 +378,43 @@ export default function App() {
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      <style>{`
-        .faq-toggle-btn-hover:hover { background-color: #dbeafe !important; }
-        .send-btn-hover:hover { color: #001bd4 !important; }
-      `}</style>
-
+      <style>{`.faq-toggle-btn-hover:hover { background-color: #dbeafe !important; } .send-btn-hover:hover { color: #001bd4 !important; }`}</style>
       {renderPageContent()}
       {selectedReceipt && <BuktiTransaksi data={selectedReceipt} onClose={selectedReceipt.standardClose ? () => setSelectedReceipt(null) : handleCloseReceipt} />}
-      
       <LogoutPopup isOpen={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} onConfirm={handleConfirmLogout} />
       
       {showHelpModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', justifyContent: 'center',
-          alignItems: 'center', zIndex: 999999, fontFamily: 'Arial, sans-serif', padding: '20px', boxSizing: 'border-box'
-        }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999999, fontFamily: 'Arial, sans-serif', padding: '20px', boxSizing: 'border-box' }}>
           <div style={{ position: 'absolute', width: '100%', height: '100%', left: 0, top: 0 }} onClick={() => setShowHelpModal(false)} />
-
-          <div style={{
-            position: 'relative', backgroundColor: '#ffffff', width: '100%', maxWidth: '650px',
-            borderRadius: '8px', padding: '25px 25px', boxSizing: 'border-box',
-            shadowbox: '0 4px 12px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center'
-          }}>
-            <h3 style={{ margin: '0 0 10px 0', fontSize: '15px', fontWeight: '700', color: '#000000', textAlign: 'center' }}>
-              Ada yang bisa kami bantu?
-            </h3>
-
-            <div style={{
-              width: '100%', backgroundColor: '#ebf3ff', border: '1px solid #b3d1ff',
-              borderRadius: '20px', padding: '10px 20px', boxSizing: 'border-box',
-              textAlign: 'center', marginBottom: '22px'
-            }}>
-              <p style={{ margin: 0, fontSize: '14.5px', color: '#000000', fontWeight: '500' }}>
-                Temukan jawaban untuk pertanyaanmu di FAQ atau langsung hubungi kami.
-              </p>
+          <div style={{ position: 'relative', backgroundColor: '#ffffff', width: '100%', maxWidth: '650px', borderRadius: '8px', padding: '25px 25px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '15px', fontWeight: '700', color: '#000000', textAlign: 'center' }}>Ada yang bisa kami bantu?</h3>
+            <div style={{ width: '100%', backgroundColor: '#ebf3ff', border: '1px solid #b3d1ff', borderRadius: '20px', padding: '10px 20px', boxSizing: 'border-box', textAlign: 'center', marginBottom: '22px' }}>
+              <p style={{ margin: 0, fontSize: '14.5px', color: '#000000', fontWeight: '500' }}>Temukan jawaban untuk pertanyaanmu di FAQ atau langsung hubungi kami.</p>
             </div>
-
-            <div style={{
-              width: '100%', border: '1px solid #dcdcdc', borderRadius: '12px',
-              padding: '15px 20px', boxSizing: 'border-box', marginBottom: '18px', backgroundColor: '#ffffff'
-            }}>
-              <h2 style={{ margin: '0 0 15px 0', fontSize: '20px', fontWeight: '800', color: '#000000', textAlign: 'center', letterSpacing: '0.5px' }}>
-                FAQ
-              </h2>
-
+            <div style={{ width: '100%', border: '1px solid #dcdcdc', borderRadius: '12px', padding: '15px 20px', boxSizing: 'border-box', marginBottom: '18px', backgroundColor: '#ffffff' }}>
+              <h2 style={{ margin: '0 0 15px 0', fontSize: '20px', fontWeight: '800', color: '#000000', textAlign: 'center', letterSpacing: '0.5px' }}>FAQ</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {faqData.map((item, index) => (
                   <div key={index} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '15px' }}>
-                      <div style={{
-                        width: '20px', height: '20px', borderRadius: '50%',
-                        border: '1px solid #a5bbf1', backgroundColor: '#ebf1fe', flexShrink: 0
-                      }} />
-
-                      <button
-                        type="button"
-                        className="faq-toggle-btn-hover"
-                        onClick={() => setActiveFaq(activeFaq === index ? null : index)}
-                        style={{
-                          flex: 1, backgroundColor: '#ebf3ff', border: '1px solid #b3d1ff',
-                          borderRadius: '20px', padding: '8px 16px', display: 'flex',
-                          justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
-                          textAlign: 'left', color: '#000000', fontSize: '13.5px', fontWeight: '500',
-                          transition: 'background-color 0.2s ease'
-                        }}
-                      >
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '1px solid #a5bbf1', backgroundColor: '#ebf1fe', flexShrink: 0 }} />
+                      <button type="button" className="faq-toggle-btn-hover" onClick={() => setActiveFaq(activeFaq === index ? null : index)} style={{ flex: 1, backgroundColor: '#ebf3ff', border: '1px solid #b3d1ff', borderRadius: '20px', padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', textAlign: 'left', color: '#000000', fontSize: '13.5px', fontWeight: '500', transition: 'background-color 0.2s ease' }}>
                         <span>{item.title}</span>
-                        <div style={{ 
-                          color: '#000000', 
-                          transform: activeFaq === index ? 'rotate(180deg)' : 'none', 
-                          display: 'flex', 
-                          alignItems: 'center',
-                          transition: 'transform 0.2s ease'
-                        }}>
-                          {Icons.ArrowDown}
-                        </div>
+                        <div style={{ color: '#000000', transform: activeFaq === index ? 'rotate(180deg)' : 'none', display: 'flex', alignItems: 'center', transition: 'transform 0.2s ease' }}>{Icons.ArrowDown}</div>
                       </button>
                     </div>
-
-                    {activeFaq === index && (
-                      <div style={{
-                        marginLeft: '35px', marginTop: '6px', padding: '10px 15px',
-                        backgroundColor: '#f8fafc', borderRadius: '8px', borderLeft: '3px solid #2563eb',
-                        fontSize: '12.5px', color: '#475569', lineHeight: '1.4'
-                      }}>
-                        {item.content}
-                      </div>
-                    )}
+                    {activeFaq === index && ( <div style={{ marginLeft: '35px', marginTop: '6px', padding: '10px 15px', backgroundColor: '#f8fafc', borderRadius: '8px', borderLeft: '3px solid #2563eb', fontSize: '12.5px', color: '#475569', lineHeight: '1.4' }}>{item.content}</div> )}
                   </div>
                 ))}
               </div>
             </div>
-
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <label style={{ fontSize: '13px', fontWeight: '500', color: '#000000', textDecoration: 'underline', marginBottom: '8px' }}>
-                Pertanyaan / Keluhan anda dapat anda sampaikan melalui kotak ini
-              </label>
-
-              <div style={{
-                width: '100%', display: 'flex', alignItems: 'center', border: '1px solid #b3d1ff',
-                borderRadius: '4px', padding: '2px 8px', boxSizing: 'border-box', backgroundColor: '#ffffff'
-              }}>
-                <input
-                  type="text"
-                  value={pesanBantuan}
-                  onChange={(e) => setPesanBantuan(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleKirimKeluhan()}
-                  style={{
-                    flex: 1, border: 'none', outline: 'none', padding: '8px 4px',
-                    fontSize: '13px', color: '#000000'
-                  }}
-                />
-                <button
-                  type="button" 
-                  className="send-btn-hover"
-                  onClick={handleKirimKeluhan}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: pesanBantuan.trim() ? '#0026e6' : '#cccccc', display: 'flex',
-                    alignItems: 'center', padding: '4px', transition: 'color 0.2s ease'
-                  }}
-                >
-                  {Icons.Send}
-                </button>
+              <label style={{ fontSize: '13px', fontWeight: '500', color: '#000000', textDecoration: 'underline', marginBottom: '8px' }}>Pertanyaan / Keluhan anda dapat anda sampaikan melalui kotak ini</label>
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', border: '1px solid #b3d1ff', borderRadius: '4px', padding: '2px 8px', boxSizing: 'border-box', backgroundColor: '#ffffff' }}>
+                <input type="text" value={pesanBantuan} onChange={(e) => setPesanBantuan(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleKirimKeluhan()} style={{ flex: 1, border: 'none', outline: 'none', padding: '8px 4px', fontSize: '13px', color: '#000000' }} />
+                <button type="button" className="send-btn-hover" onClick={handleKirimKeluhan} style={{ background: 'none', border: 'none', cursor: 'pointer', color: pesanBantuan.trim() ? '#0026e6' : '#cccccc', display: 'flex', alignItems: 'center', padding: '4px', transition: 'color 0.2s ease' }}>{Icons.Send}</button>
               </div>
             </div>
-
           </div>
         </div>
       )}

@@ -173,7 +173,7 @@ export default function CurrencyExchange() {
       padding: '24px',
       borderRadius: '16px',
       border: '1px solid #e2e8f0',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      boxShadow: '0 1px 3px rgba(146, 87, 87, 0.04)',
       boxSizing: 'border-box',
       width: '65%'
     },

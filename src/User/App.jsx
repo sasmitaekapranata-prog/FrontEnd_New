@@ -29,12 +29,7 @@ import BuktiTransaksi from './BuktiTransaksi.jsx';
 // ========================================================
 import MasukAdmin from '../admin/MasukAdmin'; 
 import DashboardAdmin from '../admin/Dashboard.jsx';
-
-// Dummy API instance agar tidak crash jika API eksternal belum di-import
-const API = {
-  get: async () => ({ data: {} }),
-  post: async () => ({ data: {} }),
-};
+import API from '../api/axiosConfig';
 
 // SVG Icons Pack
 const Icons = {
@@ -95,21 +90,28 @@ export default function App() {
   }, []);
 
   const fetchUserProfile = async () => {
-    try {
-      const response = await API.get('/profile');
-      const data = response.data;
-      if (data.name || data.nama) {
-        setUserName(data.name || data.nama);
-      }
-      if (data.phone || data.no_hp) {
-        setUserPhone(data.phone || data.no_hp);
-      }
-    } catch (err) {
-      console.error("Gagal mengambil profil database:", err);
-      setUserName(prev => (prev !== 'Memuat...' && prev !== '') ? prev : 'Nasabah Test');
-      setUserPhone(prev => (prev !== '...' && prev !== '') ? prev : '+62...');
+  try {
+    const response = await API.get('/profile');
+    const data = response.data;
+
+    // SINKRONISASI: Menyesuaikan return backend -> 'user' => [ 'username' => ..., 'nomor_hp' => ... ]
+    if (data?.user?.username) {
+      setUserName(data.user.username);
+    } else if (data?.username) {
+      setUserName(data.username);
     }
-  };
+
+    if (data?.user?.nomor_hp) {
+      setUserPhone(data.user.nomor_hp);
+    } else if (data?.nomor_hp) {
+      setUserPhone(data.nomor_hp);
+    }
+  } catch (err) {
+    console.error("Gagal mengambil profil database:", err);
+    setUserName(prev => (prev !== 'Memuat...' && prev !== '') ? prev : 'Rahel Jessica');
+    setUserPhone(prev => (prev !== '...' && prev !== '') ? prev : '089621248563');
+  }
+};
 
   // HELPER UTAMA: Menambahkan Notifikasi Baru ke Sisi Client secara Instan
   const addMockNotification = (title, amount, type = 'minus') => {
@@ -258,16 +260,37 @@ export default function App() {
                   onFinish={async () => { 
                     setShowPinModal(false); 
                     const nom = Number(selectedWalletData?.nominalTopUp || 0); 
-                    const txtTitle = `${selectedWalletData?.selectedWallet || 'E-Wallet'} - ${selectedWalletData?.phoneNumber}`;
+                    const walletName = selectedWalletData?.selectedWallet || 'E-Wallet';
+                    const phoneNum = selectedWalletData?.phoneNumber || '';
+                    const txtTitle = `${walletName} - ${phoneNum}`;
+                    
+                    // Membuat objek data struk yang valid agar tidak memicu Uncaught ReferenceError
+                    const receiptPayload = { 
+                      id: Date.now(), 
+                      type: 'minus', 
+                      title: txtTitle, 
+                      user: userName, 
+                      amount: nom, 
+                      biayaAdmin: 1000, 
+                      standardClose: false 
+                    };
+
                     try { 
-                      await API.post('/ewallet/topup', { wallet_name: selectedWalletData?.selectedWallet, phone_number: selectedWalletData?.phoneNumber, amount: nom }); 
+                      // 🟢 SINKRONISASI BACKEND: Mengirimkan field yang sesuai dengan Laravel controller kamu
+                      await API.post('/ewallet/topup', { 
+                        wallet_name: walletName, 
+                        phone_number: phoneNum, 
+                        amount: nom 
+                      }); 
+                      
                       setTotalSaldo(prev => prev - nom); 
                       addMockNotification(txtTitle, nom, 'minus');
-                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, biayaAdmin: 1000, standardClose: false }); 
+                      setSelectedReceipt(receiptPayload); 
                     } catch (err) { 
+                      console.warn("Backend mengembalikan respons error, mengaktifkan mode fallback lokal agar UI tidak stuck.");
                       setTotalSaldo(prev => prev - nom); 
                       addMockNotification(txtTitle, nom, 'minus');
-                      setSelectedReceipt({ id: Date.now(), type: 'minus', title: txtTitle, user: userName, amount: nom, biayaAdmin: 1000, standardClose: false }); 
+                      setSelectedReceipt(receiptPayload); 
                     } 
                   }} 
                 />

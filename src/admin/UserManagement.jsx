@@ -65,13 +65,21 @@ export default function UserManagement() {
   useEffect(() => {
     API.get('/admin/users')
       .then((res) => {
-        const dataDariServer = res.data.data || [];
-        // Jika server mengembalikan data, selipkan Angeliqia di baris paling atas
-        setUsers([defaultUser, ...dataDariServer]);
+        // Mengambil array data pengguna dari respons API Laravel
+        const dataDariServer = Array.isArray(res.data) ? res.data : (res.data.data || []);
+        
+        // Memastikan field dari server terpetakan dengan benar sesuai properti tabel kamu
+        const dataTervalidasi = dataDariServer.map(u => ({
+          ID_User: u.id || u.ID_User || Date.now().toString(),
+          username: u.username || u.name || 'User Baru',
+          nomor_hp: u.nomor_hp || u.phone || ''
+        }));
+
+        // Gabungkan defaultUser asli bawaan kamu dengan data riil dari server
+        setUsers([defaultUser, ...dataTervalidasi]);
       })
       .catch((err) => {
-        console.warn("Koneksi API gagal, menggunakan data default lokal.");
-        // Jika server mati, biarkan state berisi data default Angeliqia
+        console.warn("Koneksi API admin gagal atau backend belum siap, menampilkan data mockup.", err);
         setUsers([defaultUser]);
       });
   }, []);

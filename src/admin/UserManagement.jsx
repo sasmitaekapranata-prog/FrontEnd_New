@@ -5,22 +5,22 @@ import { Users, Search, Plus } from 'lucide-react';
 export default function UserManagement() {
   const [search, setSearch] = useState('');
   
-  // 1. SET DATA BAWAAN (FALLBACK) AGAR SELALU ADA DI TABEL JIKA API KOSONG
-  const defaultUser = {
-    ID_User: 'default-1',
-    username: 'Angeliqia',
-    nomor_hp: '081362267690'
-  };
-
-  const [users, setUsers] = useState([defaultUser]);
+  const [users, setUsers] = useState([]);
   const totalUsers = users.length;
 
   // 2. PERBAIKAN BUG: Mengubah pencarian toLowerCase() agar tidak memicu error crash
   const filteredUsers = users.filter((u) => {
-    const nameMatch = u?.username?.toLowerCase().includes(search.toLowerCase());
-    const phoneMatch = u?.nomor_hp?.includes(search);
-    return nameMatch || phoneMatch;
-  });
+
+  const nama = (u.username || "").toLowerCase();
+
+  const nomor = u.nomor_hp || "";
+
+  return (
+    nama.includes(search.toLowerCase()) ||
+    nomor.includes(search)
+  );
+
+});
 
   const handleTambahUser = async () => {
     try {
@@ -62,27 +62,26 @@ export default function UserManagement() {
     }
   };
 
-  useEffect(() => {
-    API.get('/admin/users')
-      .then((res) => {
-        // Mengambil array data pengguna dari respons API Laravel
-        const dataDariServer = Array.isArray(res.data) ? res.data : (res.data.data || []);
-        
-        // Memastikan field dari server terpetakan dengan benar sesuai properti tabel kamu
-        const dataTervalidasi = dataDariServer.map(u => ({
-          ID_User: u.id || u.ID_User || Date.now().toString(),
-          username: u.username || u.name || 'User Baru',
-          nomor_hp: u.nomor_hp || u.phone || ''
-        }));
+ useEffect(() => {
 
-        // Gabungkan defaultUser asli bawaan kamu dengan data riil dari server
-        setUsers([defaultUser, ...dataTervalidasi]);
-      })
-      .catch((err) => {
-        console.warn("Koneksi API admin gagal atau backend belum siap, menampilkan data mockup.", err);
-        setUsers([defaultUser]);
-      });
-  }, []);
+  API.get('/admin/users')
+    .then((res) => {
+
+      console.log("Data dari backend:");
+      console.log(res.data);
+
+      setUsers(res.data.data);
+
+    })
+    .catch((err) => {
+
+      console.error("Gagal mengambil data user");
+
+      console.error(err);
+
+    });
+
+}, []);
 
   // 🛡️ CSS INLINE MASTER
   const styles = {

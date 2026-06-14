@@ -221,22 +221,35 @@ export default function App() {
       case 'dashboard':
         return <DashboardUser userName={userName} totalSaldo={totalSaldo} onLogout={handleOpenLogout} onAddWallet={() => setPage('AddWallet')} onSend={() => setPage('send')} onNavigate={(t) => setPage(t)} />;
       case 'daftar':
-        return (
-          <Daftar 
-            onBack={() => setPageState('welcome')} 
-            onNext={async (n, p, e, pwd) => { 
-              if (n) setUserName(n); 
-              if (p) setUserPhone(p); 
-              try { 
-                const res = await API.post('/register', { name: n, phone: p, email: e || p, password: pwd }); 
-                if (res.data.token) { localStorage.setItem('auth_token', res.data.token); localStorage.setItem('user_role', 'user'); } 
-                setPageState('pin'); 
-              } catch (err) { 
-                setPageState('pin'); 
-              } 
-            }} 
-          />
-        );
+  return (
+    <Daftar 
+      onBack={() => setPageState('welcome')} 
+      onNext={async (n, p, e, pwd) => { 
+        if (n) setUserName(n); 
+        if (p) setUserPhone(p); 
+        try { 
+          // 🟢 KITA UBAH NAMA PROPERTINYA AGAR SAMA DENGAN VALIDATOR LARAVEL
+          // username diisi nilai n, nomor_hp diisi nilai p, pin kita beri nilai default 6 digit angka dulu
+          const res = await API.post('/register', { 
+            username: n, 
+            nomor_hp: p, 
+            password: pwd,
+            pin: '123456' 
+          }); 
+          
+          if (res.data.token) { 
+            localStorage.setItem('auth_token', res.data.token); 
+            localStorage.setItem('user_role', 'user'); 
+          } 
+          setPageState('pin'); 
+        } catch (err) { 
+          // Jika gagal konek ke database, biarkan sistem masuk ke mode mockup/simulasi aslimu
+          console.log("Koneksi API gagal, beralih ke halaman PIN lokal");
+          setPageState('pin'); 
+        } 
+      }} 
+    />
+  );
       case 'pin': 
         return <Pin key="pin-daftar" pinSource="daftar" userName={userName} onBack={() => setPage('daftar')} onFinish={() => { fetchUserProfile(); setPageState('dashboard'); }} />;
       case 'notifikasi': 

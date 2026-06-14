@@ -4,14 +4,26 @@ import { Users, Search, Plus } from 'lucide-react';
 // Menerima data users dan setUsers sebagai Props dari Dashboard
 export default function UserManagement({ users, setUsers }) {
   const [search, setSearch] = useState('');
+<<<<<<< HEAD
+=======
+  
+  const [users, setUsers] = useState([]);
+>>>>>>> e3d623f8c69aba0c4907be35c916711d52949df0
   const totalUsers = users.length;
 
   // FILTER PENCARIAN
   const filteredUsers = users.filter((u) => {
-    const nameMatch = u?.username?.toLowerCase().includes(search.toLowerCase());
-    const phoneMatch = u?.nomor_hp?.includes(search);
-    return nameMatch || phoneMatch;
-  });
+
+  const nama = (u.username || "").toLowerCase();
+
+  const nomor = u.nomor_hp || "";
+
+  return (
+    nama.includes(search.toLowerCase()) ||
+    nomor.includes(search)
+  );
+
+});
 
   // FUNGSI TAMBAH USER MURNI FRONTEND 
   const handleTambahUser = () => {
@@ -46,6 +58,30 @@ export default function UserManagement({ users, setUsers }) {
     alert("User berhasil ditambahkan!");
   };
 
+<<<<<<< HEAD
+=======
+ useEffect(() => {
+
+  API.get('/admin/users')
+    .then((res) => {
+
+      console.log("Data dari backend:");
+      console.log(res.data);
+
+      setUsers(res.data.data);
+
+    })
+    .catch((err) => {
+
+      console.error("Gagal mengambil data user");
+
+      console.error(err);
+
+    });
+
+}, []);
+
+>>>>>>> e3d623f8c69aba0c4907be35c916711d52949df0
   // 🛡️ CSS INLINE MASTER
   const styles = {
     container: { display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', boxSizing: 'border-box', textAlign: 'left' },

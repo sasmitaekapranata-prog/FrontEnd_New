@@ -14,7 +14,7 @@ const API = axios.create({
 // 2. Interceptor (Otomatis menempelkan Token JWT di setiap request)
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('auth_token'); 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`; 
     }

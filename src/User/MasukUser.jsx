@@ -1,3 +1,4 @@
+import API from '../api/axiosConfig';
 import { useState } from 'react';
 // 🟢 INTEGRASI BACKEND: Mengimpor fungsi loginUser dari file authApi.js Anda
 import { loginUser } from '../api/authApi'; 
@@ -27,7 +28,13 @@ export default function MasukUser({ onBack, onLoginSuccess }) {
     try {
       console.log("Mencoba login dengan:", { nomor_hp: phone, password: password });
       
-      const data = await loginUser(phone, password);
+      // 🟢 FIX UTAMA: Kirim parameter 'nomor_hp' secara presisi ke endpoint Laravel
+      const response = await API.post('/login', {
+        nomor_hp: phone,
+        password: password
+      });
+
+      const data = response.data;
       const token = data?.token; 
 
       if (token) {
@@ -42,14 +49,11 @@ export default function MasukUser({ onBack, onLoginSuccess }) {
     } catch (err) {
       console.error("Gagal Login API:", err);
       
-      // Penanganan pesan error yang adaptif dan akurat
       let errorMessage = 'Login Gagal! Nomor HP atau Password salah.';
       
       if (err && err.response) {
-        // Jika server merespon dengan status error (400, 401, 500, dll)
         errorMessage = err.response.data?.message || err.response.data?.error || `Terjadi kesalahan pada server (Status: ${err.response.status})`;
       } else if (err && err.request) {
-        // Jika tidak mendapat respon sama sekali (Server Backend Mati)
         errorMessage = 'Tidak dapat terhubung ke server backend. Pastikan server API Anda sudah dinyalakan!';
       } else if (err && err.message) {
         errorMessage = err.message;
